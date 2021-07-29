@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>title</th>
+                    <th>description</th>
+                    <th>image</th>
+                    <th>author</th>
+                    <th>category</th>
+                </tr>
+            </thead>
+            <tbody id="data-table">
+               
+            </tbody>
+        </table>
+    </div>
+    <div style="margin: 30px 0 0 0;">
+        <form id="data-form">
+            <input type="text" name="title" id="" placeholder="title..."><br>
+            <input type="text" name="description" id="" placeholder="description..."><br>
+            <input type="file" name="image" id="" placeholder="image..."><br>
+            <input type="text" name="author" id="" placeholder="author..."><br>
+            <select name="category" id="option-cate">
+                <option value=""></option>
+            </select>
+            <button type="submit">creat</button>
+        </form>
+    </div>
+    <script>
+        async function listBook(){
+            let data = await fetch('http://localhost:4005/api/books');
+            let {data:books} = await data.json();
+            // console.log(books);
+            let dataTable = books.map(ele=>{
+                return `
+                <tr>
+                    <td>${ele.title}</td>
+                    <td>${ele.description}</td>
+                    <td>${ele.image}</td>
+                    <td>${ele.author}</td>
+                    <td>${ele.category.name}</td>
+                </tr>
+                `;
+            }).join("");
+            document.getElementById('data-table').innerHTML= await dataTable;
+        }
+        listBook();
+        async function dataform(){
+            let data = await fetch('http://localhost:4005/api/category');
+            let {data:cate}=  await data.json();
+            let dataCate = cate.map(ele=>{
+                return `
+                <option value="${ele._id}">${ele.name}</option>
+                `;
+            }).join("");
+            document.getElementById('option-cate').innerHTML= await dataCate;
+        }
+        dataform();
+        async function creatBook(){
+            document.getElementById('data-form').addEventListener('submit',async (e)=>{
+                e.preventDefault();
+                const data = {
+                title:document.querySelector('[name="title"]').value,
+                description:document.querySelector('[name="description"]').value,
+                image:document.querySelector('[name="image"]').value,
+                author:document.querySelector('[name="author"]').value,
+                category:document.querySelector('[name="category"]').value,
+            }
+            console.log(data);
+         await   fetch('http://localhost:4005/api/books',{
+                method:"POST",
+                headers:{
+                    "Content-Type":"Application/json"
+                },
+                body: JSON.stringify(data)
+            }).then(()=>{
+                console.log('creat ok');
+                listBook();
+            }).catch(err=>console.log(err))
+            })
+           
+        }
+        creatBook();
+    </script>
+</body>
+</html>
